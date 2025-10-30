@@ -550,28 +550,32 @@ io.on("connection", (socket) => {
         io.to(subscriberSocketId).emit("presence-update", { pubKey: key, status: "online" });
       });
     }
-  });
-  
+    
     // --- NEW: Check for offline relayed messages ---
     (async () => {
-            try {
-                const messages = await offlineMessagesCollection.find({ recipientPubKey: key }).toArray();
-                if (messages.length > 0) {
-                    console.log(`📬 Found ${messages.length} relayed messages for ${key.slice(0,10)}...`);
-                    messages.forEach(msg => {
-                        // Send each message to the newly connected client
-                        socket.emit("offline-message", {
-                            id: msg._id.toString(), // Send the DB ID
-                            from: msg.senderPubKey,
-                            payload: msg.encryptedPayload,
-                            sentAt: msg.createdAt
-                        });
+        try {
+            const messages = await offlineMessagesCollection.find({ recipientPubKey: key }).toArray();
+            if (messages.length > 0) {
+                console.log(`📬 Found ${messages.length} relayed messages for ${key.slice(0,10)}...`);
+                messages.forEach(msg => {
+                    // Send each message to the newly connected client
+                    socket.emit("offline-message", {
+                        id: msg._id.toString(), // Send the DB ID
+                        from: msg.senderPubKey,
+                        payload: msg.encryptedPayload,
+                        sentAt: msg.createdAt
                     });
-                }
-            } catch (err) {
-                console.error(`Error fetching offline messages for ${key.slice(0,10)}:`, err);
+                });
             }
-        })();
+        } catch (err) {
+            console.error(`Error fetching offline messages for ${key.slice(0,10)}:`, err);
+        }
+    })();
+// --- END NEW ---
+ });
+  
+    // --- NEW: Check for offline relayed messages ---
+    
         // --- END NEW ---
   
   
