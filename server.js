@@ -124,6 +124,7 @@ app.post("/claim-id", async (req, res) => {
             statusText = decodedProfile.statusText || null; // Extract status text, default to null if missing
             updateText = decodedProfile.updateText || null;
             updateColor = decodedProfile.updateColor || null;
+            ecdhPubKey = decodedProfile.ecdhPubKey || null; // <-- NEW
             console.log(`[Claim/Update ID: ${customId}] Decoded Profile - Status Text: '${statusText}'`);
             
         } catch (e) {
@@ -144,6 +145,7 @@ app.post("/claim-id", async (req, res) => {
             name: decodedProfile?.name || null, // Store name
             avatar: decodedProfile?.avatar || null, // Store avatar (URL or null)
             statusText: statusText, // Store status text (string or null)
+            ecdhPubKey: ecdhPubKey,
             updateText: updateText,
             updateColor: updateColor,
             updateTimestamp: updateText ? new Date() : null 
@@ -218,7 +220,8 @@ app.get("/get-invite/:id", async (req, res) => {
                 statusText: item.statusText || null, // Include status text
                 updateText: item.updateText || null,
                 updateColor: item.updateColor || null,
-                updateTimestamp: item.updateTimestamp || null
+                updateTimestamp: item.updateTimestamp, || null
+                ecdhPubKey: item.ecdhPubKey || null, // <-- NEW
             };
             // Remove null/undefined values to keep payload clean
             Object.keys(invitePayload).forEach(key => invitePayload[key] == null && delete invitePayload[key]);
