@@ -552,25 +552,7 @@ io.on("connection", (socket) => {
     }
     
     // --- NEW: Check for offline relayed messages ---
-    (async () => {
-        try {
-            const messages = await offlineMessagesCollection.find({ recipientPubKey: key }).toArray();
-            if (messages.length > 0) {
-                console.log(`📬 Found ${messages.length} relayed messages for ${key.slice(0,10)}...`);
-                messages.forEach(msg => {
-                    // Send each message to the newly connected client
-                    socket.emit("offline-message", {
-                        id: msg._id.toString(), // Send the DB ID
-                        from: msg.senderPubKey,
-                        payload: msg.encryptedPayload,
-                        sentAt: msg.createdAt
-                    });
-                });
-            }
-        } catch (err) {
-            console.error(`Error fetching offline messages for ${key.slice(0,10)}:`, err);
-        }
-    })();
+    
 // --- END NEW ---
  });
   
@@ -605,6 +587,31 @@ io.on("connection", (socket) => {
       }
   });
 
+    
+  // --- NEW: Client "pull" request for offline messages ---
+  socket.on("check-for-offline-messages", async () => {
+      const key = socket.data.pubKey;
+      if (!key) return; // Client not registered
+
+      try {
+          const messages = await offlineMessagesCollection.find({ recipientPubKey: key }).toArray();
+          if (messages.length > 0) {
+              console.log(`📬 Client ${key.slice(0,10)}... is pulling ${messages.length} relayed messages.`);
+              messages.forEach(msg => {
+                  socket.emit("offline-message", {
+                      id: msg._id.toString(),
+                      from: msg.senderPubKey,
+                      payload: msg.encryptedPayload,
+                      sentAt: msg.createdAt
+                  });
+              });
+          } else {
+               console.log(`📬 Client ${key.slice(0,10)}... pulled messages, 0 found.`);
+          }
+      } catch (err) {
+          console.error(`Error fetching offline messages for ${key.slice(0,10)}:`, err);
+      }
+  });
   // Handle presence subscription
   socket.on("subscribe-to-presence", (contactPubKeys) => {
     console.log(`📡 Presence subscription from ${socket.id} for ${contactPubKeys.length} contacts.`);
