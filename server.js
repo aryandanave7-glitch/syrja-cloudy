@@ -218,10 +218,11 @@ app.get("/get-invite/:id", async (req, res) => {
                 server: process.env.SERVER_URL || '', // Example: Get server URL if needed
                 avatar: item.avatar || null,
                 statusText: item.statusText || null, // Include status text
+                ecdhPubKey: item.ecdhPubKey || null, // <-- NEW
                 updateText: item.updateText || null,
                 updateColor: item.updateColor || null,
                 updateTimestamp: item.updateTimestamp, || null
-                ecdhPubKey: item.ecdhPubKey || null, // <-- NEW
+                
             };
             // Remove null/undefined values to keep payload clean
             Object.keys(invitePayload).forEach(key => invitePayload[key] == null && delete invitePayload[key]);
