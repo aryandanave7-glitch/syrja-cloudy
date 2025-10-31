@@ -221,7 +221,7 @@ app.get("/get-invite/:id", async (req, res) => {
                 ecdhPubKey: item.ecdhPubKey || null, // <-- NEW
                 updateText: item.updateText || null,
                 updateColor: item.updateColor || null,
-                updateTimestamp: item.updateTimestamp, || null
+                updateTimestamp: item.updateTimestamp || null
                 
             };
             // Remove null/undefined values to keep payload clean
