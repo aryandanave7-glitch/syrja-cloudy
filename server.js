@@ -64,7 +64,20 @@ const ADJECTIVES = ["alpha", "beta", "gamma", "delta", "zeta", "nova", "comet", 
 const NOUNS = ["fox", "wolf", "hawk", "lion", "tiger", "bear", "crane", "iris", "rose", "maple"];
 
 const app = express();
-app.use(cors());
+
+// --- NEW: Explicit CORS Configuration ---
+const corsOptions = {
+  origin: "*", // Allow all origins (you can restrict this later)
+  methods: "GET,POST,DELETE,OPTIONS", // Allow these methods
+  allowedHeaders: "Content-Type" // Allow the JSON content type header
+};
+
+// Enable pre-flight requests for all routes
+app.options('*', cors(corsOptions)); 
+// Use the main CORS configuration
+app.use(cors(corsOptions));
+// --- END NEW ---
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
