@@ -386,6 +386,36 @@ app.post("/unblock-user", async (req, res) => {
 // --- START: Offline Message Relay Service ---
 const USER_QUOTA_BYTES = 1 * 1024 * 1024; // 1MB
 
+// --- NEW: Endpoint to delete all user data from the server ---
+app.post("/discontinue-service", async (req, res) => {
+    const { pubKey } = req.body;
+    if (!pubKey) {
+        return res.status(400).json({ error: "Public key is required for authentication." });
+    }
+
+    try {
+        // 1. Delete the user's Syrja ID
+        const idDeleteResult = await idsCollection.deleteOne({ pubKey: pubKey });
+        
+        // 2. Delete all relayed messages sent by this user
+        const msgDeleteResult = await offlineMessagesCollection.deleteMany({ senderPubKey: pubKey });
+
+        console.log(`🗑️ DISCONTINUE SERVICE for ${pubKey.slice(0,10)}...`);
+        console.log(`   - Syrja ID deleted: ${idDeleteResult.deletedCount}`);
+        console.log(`   - Relayed messages deleted: ${msgDeleteResult.deletedCount}`);
+        
+        res.json({ 
+            success: true, 
+            idDeleted: idDeleteResult.deletedCount, 
+            messagesDeleted: msgDeleteResult.deletedCount 
+        });
+
+    } catch (err) {
+        console.error("discontinue-service error:", err);
+        res.status(500).json({ error: "Database operation failed during data deletion." });
+    }
+});
+
 app.post("/relay-message", async (req, res) => {
     const { senderPubKey, recipientPubKey, encryptedPayload } = req.body;
 
