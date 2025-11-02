@@ -383,6 +383,31 @@ app.post("/unblock-user", async (req, res) => {
     }
 });
 
+// --- NEW: Endpoint to delete ALL relayed messages for a user ---
+app.post("/delete-all-relayed-messages", async (req, res) => {
+    const { pubKey } = req.body;
+    if (!pubKey) {
+        return res.status(400).json({ error: "Public key is required for authentication." });
+    }
+
+    try {
+        // Delete all relayed messages sent by this user
+        const msgDeleteResult = await offlineMessagesCollection.deleteMany({ senderPubKey: pubKey });
+
+        console.log(`🗑️ DELETED ALL RELAYED MESSAGES for ${pubKey.slice(0,10)}...`);
+        console.log(`   - Messages deleted: ${msgDeleteResult.deletedCount}`);
+        
+        res.json({ 
+            success: true, 
+            messagesDeleted: msgDeleteResult.deletedCount 
+        });
+
+    } catch (err) {
+        console.error("delete-all-relayed-messages error:", err);
+        res.status(500).json({ error: "Database operation failed during message deletion." });
+    }
+});
+
 // --- NEW: Endpoint to delete all user data from the server ---
 app.post("/discontinue-service", async (req, res) => {
     const { pubKey } = req.body;
