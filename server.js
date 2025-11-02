@@ -383,9 +383,6 @@ app.post("/unblock-user", async (req, res) => {
     }
 });
 
-// --- START: Offline Message Relay Service ---
-const USER_QUOTA_BYTES = 1 * 1024 * 1024; // 1MB
-
 // --- NEW: Endpoint to delete all user data from the server ---
 app.post("/discontinue-service", async (req, res) => {
     const { pubKey } = req.body;
@@ -415,6 +412,9 @@ app.post("/discontinue-service", async (req, res) => {
         res.status(500).json({ error: "Database operation failed during data deletion." });
     }
 });
+
+// --- START: Offline Message Relay Service ---
+const USER_QUOTA_BYTES = 1 * 1024 * 1024; // 1MB
 
 app.post("/relay-message", async (req, res) => {
     const { senderPubKey, recipientPubKey, encryptedPayload } = req.body;
